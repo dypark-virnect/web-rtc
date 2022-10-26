@@ -8,14 +8,11 @@ html(lang="en")
 		link(rel="stylesheet", href="https://unpkg.com/mvp.css")
 	body
 		header
-			h1 ChatRoom
+			h1 ChatRoom 😎
 		main
-			ul
-			h2 Welcome😎💖💕💖💕
-			form#nickname
-				input(type="text", placeholder="write a name", required)
-				button Save
-			form#message
-				input(type="text", placeholder="write a message", required)
-				button Send
-		script(src="/public/js/app.js") 
+			div#welcome
+				form
+					input(type="text", placeholder="room name")
+					button Join 
+		script(src="/socket.io/socket.io.js") 
+		script(src="/public/js/app.js")

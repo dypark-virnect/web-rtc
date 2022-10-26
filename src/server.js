@@ -1,6 +1,7 @@
 import http from "http";
-import WebSocket from "ws";
 import express from "express";
+import { Server } from "socket.io";
+
 
 const app = express();
 
@@ -10,32 +11,20 @@ app.use("/public", express.static(__dirname + "/public"));
 app.get("/", (_, res) => res.render("home"));
 app.get("/*", (_, res) => res.redirect("/"));
 
-const handleListen = () => console.log(`Listening on http://localhost:3000`);
+const httpServer = http.createServer(app);
+const wsServer = new Server(httpServer);
+// -> localhost:3000/socket.io/socket.io.js가 제공됨
+// socket io is not implementation of websocket
 
-const server = http.createServer(app);
-const wss = new WebSocket.Server({ server });
-let sockets = [];
-
-wss.on("connection", (socket)=>{
-	sockets.push(socket);
-	socket["nickname"] = "Anonnomous";
-	socket.send("hello from the server 👋");
-	socket.on("message", (message)=>{
-		const parsed = JSON.parse(message);
-		switch(parsed.type)
-		{
-			case "new_message":
-				sockets.forEach(aSocket => aSocket.send(`${socket.nickname} : ${parsed.payload}`));
-				break;
-			case "nickname":
-				socket["nickname"] = parsed.payload;
-				break;
-
-		}
-	});
-	socket.on("close", ()=> {
-		console.log("Disconnected from the Browser")
-		sockets = sockets.filter(aSocket => aSocket !== socket);
+wsServer.on("connection", (socket) => {
+	console.log(socket);
+	socket.on("enter_room", (message, done) => {
+		console.log(message);
+		setTimeout(() => {
+			done();
+		}, 1000);
 	});
 });
-server.listen(3000, handleListen);
+
+
+httpServer.listen(3000, () => console.log(`Listening on http://localhost:3000`));
