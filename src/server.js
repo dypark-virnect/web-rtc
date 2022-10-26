@@ -17,14 +17,20 @@ const wsServer = new Server(httpServer);
 // socket io is not implementation of websocket
 
 wsServer.on("connection", (socket) => {
-	console.log(socket);
-	socket.on("enter_room", (message, done) => {
-		console.log(message);
-		setTimeout(() => {
-			done();
-		}, 1000);
+	socket.onAny(event => console.log(`Socket Event: ${event}`));
+	socket.on("enter_room", (roomName, nickname, done) => {
+		socket["nickname"] = nickname;
+		socket.join(roomName);
+		done();
+		socket.to(roomName).emit("welcome", socket.nickname);
+	});
+	socket.on("disconnecting", () => {
+		socket.rooms.forEach(room => socket.to(room).emit("bye", socket.nickname));
+	});
+	socket.on("new_message", (message, room, done) => {
+		socket.to(room).emit("new_message", `${socket.nickname} : ${message}`);
+		done();
 	});
 });
-
 
 httpServer.listen(3000, () => console.log(`Listening on http://localhost:3000`));
